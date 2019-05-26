@@ -10,6 +10,10 @@ export default new Router({
     routes: [
         moveRouter,
         mineRouter,
-        cinemaRouter
+        cinemaRouter,
+        {
+            path: '/',
+            redirect: '/move'
+        } //当路由都没匹配时进行重定向，写在最下面
     ]
 })
