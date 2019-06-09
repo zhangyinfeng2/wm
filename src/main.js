@@ -10,8 +10,12 @@ Vue.prototype.axios = axios
 
 //过滤器，筛选图片地址
 Vue.filter('setWH', (url, arg) => {
-    return url.replace(/w\.h/, arg);
-})
+        return url.replace(/w\.h/, arg);
+    })
+    //注册全局组件
+import Scroller from './components/Scroller'
+Vue.component('Scroller', Scroller)
+
 
 
 Vue.config.productionTip = false

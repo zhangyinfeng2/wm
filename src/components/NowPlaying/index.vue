@@ -1,8 +1,11 @@
 <template>
-  <div class="movie_body">
+
+  <div class="movie_body" ref="movie_body">
+    <Scroller>
     <ul>
+      <li class="pullDown">{{pullDownMsg}}</li>
       <li v-for="item in movieList" :key="item.id">
-        <div class="pic_show">
+        <div class="pic_show" @tap="handleToDetail">
           <img :src="item.img | setWH('128.180')">
         </div>
         <div class="info_list">
@@ -17,14 +20,19 @@
         <div class="btn_mall">购票</div>
       </li>
     </ul>
+    </Scroller>
   </div>
 </template>
 <script>
+
+import BScroll from 'better-scroll'
+
 export default {
   name: "NowPlaying",
   data(){
     return{
-      movieList:[]
+      movieList:[],
+      pullDownMsg:''
 
     }
   },
@@ -33,8 +41,41 @@ export default {
       var msg = res.data.msg;
       if(msg == 'ok'){
         this.movieList = res.data.data.movieList;
+        this.$nextTick(()=>{//vue提供的方法，当页面数据加载完成才触发里面的回调函数
+         var scroll= new BScroll(this.$refs.movie_body,{//进行scroll配置
+            tap:true,//开启tap事件
+            probeType:1//上拉刷新，截流
+          });
+            scroll.on('scroll',(pos)=>{
+              if(pos.y>30){//当拖拽的距离大于30时
+                  this.pullDownMsg = '正在更新中'
+              }
+          
+        });
+        scroll.on('touchEnd',(pos)=>{
+          if(pos.y>30){
+            this.axios.get('/api/movieOnInfoList?cityId=12').then((res)=>{
+              var msg = res.data.msg;
+              if(msg == 'ok'){
+                this.pullDownMsg = '更新成功'
+                setTimeout(()=>{
+                  this.movieList = res.data.data.movieList;
+                  this.pullDownMsg = ''
+                },1000)
+              }
+            })
+          }
+        })
+        });
+      
+        
       }
     })
+  },
+  methods:{
+    handleToDetail(){
+      console.log(1111)
+    }
   }
 
 };
