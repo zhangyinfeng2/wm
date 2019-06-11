@@ -1,104 +1,29 @@
 <template>
   <div class="city_body">
-    <!-- <div class="city_list">
-      <div class="city_hot">
-        <h2>热门城市</h2>
-        <ul class="clearfix">
-          <li>上海</li>
-          <li>北京</li>
-          <li>上海</li>
-          <li>北京</li>
-          <li>上海</li>
-          <li>北京</li>
-          <li>上海</li>
-          <li>北京</li>
-        </ul>
-      </div>
-      <div class="city_sort">
-        <div>
-          <h2>A</h2>
-          <ul>
-            <li>阿拉善盟</li>
-            <li>鞍山</li>
-            <li>安庆</li>
-            <li>安阳</li>
-          </ul>
-        </div>
-        <div>
-          <h2>B</h2>
-          <ul>
-            <li>北京</li>
-            <li>保定</li>
-            <li>蚌埠</li>
-            <li>包头</li>
-          </ul>
-        </div>
-        <div>
-          <h2>A</h2>
-          <ul>
-            <li>阿拉善盟</li>
-            <li>鞍山</li>
-            <li>安庆</li>
-            <li>安阳</li>
-          </ul>
-        </div>
-        <div>
-          <h2>B</h2>
-          <ul>
-            <li>北京</li>
-            <li>保定</li>
-            <li>蚌埠</li>
-            <li>包头</li>
-          </ul>
-        </div>
-        <div>
-          <h2>A</h2>
-          <ul>
-            <li>阿拉善盟</li>
-            <li>鞍山</li>
-            <li>安庆</li>
-            <li>安阳</li>
-          </ul>
-        </div>
-        <div>
-          <h2>B</h2>
-          <ul>
-            <li>北京</li>
-            <li>保定</li>
-            <li>蚌埠</li>
-            <li>包头</li>
-          </ul>
-        </div>
-      </div>
-    </div>
-    <div class="city_index">
-      <ul>
-        <li>A</li>
-        <li>B</li>
-        <li>C</li>
-        <li>D</li>
-        <li>E</li>
-      </ul>
-    </div>-->
+    
     <div class="city_list">
+      <Scroller ref="city_List">
+        <div>
       <div class="city_hot">
         <h2>热门城市</h2>
         <ul class="clearfix">
-          <li v-for="item in hotCity" :key="item.id">{{item.nm}}</li>
+          <li v-for="item in hotCity" :key="item.id" @tap="handleToCity(item.nm,item.id)">{{item.nm}}</li>
         </ul>
       </div>
       <div class="city_sort" ref="city_sort">
         <div v-for="(item,index) in cityList" :key="index">
           <h2>{{item.index}}</h2>
           <ul>
-            <li v-for="itemList in item.list" :key="itemList.id">{{itemList.nm}}</li>
+            <li v-for="itemList in item.list" :key="itemList.id" @tap="handleToCity(itemList.nm,itemList.id)">{{itemList.nm}}</li>
           </ul>
         </div>
       </div>
+      </div>
+      </Scroller>
     </div>
      <div class="city_index" >
       <ul>
-        <li v-for="(item,index) in cityList" :key="item.index" @touchstart="handleTOIndex(index)">{{item.index}}</li>
+        <li v-for="(item,index) in cityList" :key="item.index" @touchstart="handleTOIndex(index)" >{{item.index}}</li>
         
       </ul>
     </div>
@@ -114,7 +39,13 @@ export default {
     };
   },
   mounted() {
-    this.axios.get("/api/cityList").then(res => {
+    var cityList = window.localStorage.getItem('cityList');
+    var hotCity = window.localStorage.getItem('hotCity')
+ if(cityList && hotCity){//先判断本地存储有无数据，当无数据时再发起请求
+    this.cityList = JSON.parse(cityList);
+    this.hotCity = JSON.parse(hotCity)
+ }else{
+      this.axios.get("/api/cityList").then(res => {
       var msg = res.data.msg; //做判断，是否有数据
       if (msg === "ok") {
         var cities = res.data.data.cities;
@@ -122,8 +53,11 @@ export default {
         var { cityList, hotCity } = this.formatCityList(cities);
         this.cityList = cityList;
         this.hotCity = hotCity;
+        window.localStorage.setItem('cityList',JSON.stringify(cityList))//优化请求，存到本地存储
+        window.localStorage.setItem('hotCity',JSON.stringify(hotCity))
       }
     });
+ }
   },
   methods: {
     //城市数据格式化与筛选热门城市
@@ -182,8 +116,17 @@ export default {
     //索引跳转
     handleTOIndex(index){
         var h2 = this.$refs.city_sort.getElementsByTagName('h2');
-        this.$refs.city_sort.parentNode.scrollTop = h2[index].offsetTop
+        // this.$refs.city_sort.parentNode.scrollTop = h2[index].offsetTop
+        this.$refs.city_List.toScrollTop(-h2[index].offsetTop)
+    },
+    //增加点击事件
+    handleToCity(nm,id){
+      this.$store.commit('city/CITY_INFO',{nm,id});//改变vuex的状态
+      window.localStorage.setItem('nowNm',nm);//存到本地存储，下次打开显示上一次的地区
+      window.localStorage.setItem('nowId',id);
+      this.$router.push('/move/NowPlaying')//编程式路由跳转
     }
+
   }
 };
 </script>

@@ -14,7 +14,9 @@ Vue.filter('setWH', (url, arg) => {
     })
     //注册全局组件
 import Scroller from './components/Scroller'
+import Loading from './components/Loading'
 Vue.component('Scroller', Scroller)
+Vue.component('Loading', Loading)
 
 
 

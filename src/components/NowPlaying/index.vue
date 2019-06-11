@@ -1,7 +1,8 @@
 <template>
 
   <div class="movie_body" ref="movie_body">
-    <Scroller>
+    <Loading v-if="isLoading" />
+    <Scroller v-else :handleToScroll="handleToScroll" :handleToTouchEnd="handleToTouchEnd">
     <ul>
       <li class="pullDown">{{pullDownMsg}}</li>
       <li v-for="item in movieList" :key="item.id">
@@ -25,35 +26,46 @@
 </template>
 <script>
 
-import BScroll from 'better-scroll'
+
 
 export default {
   name: "NowPlaying",
   data(){
     return{
       movieList:[],
-      pullDownMsg:''
+      pullDownMsg:'',
+      isLoading:true,
+      prevCityId:-1
 
     }
   },
-  mounted(){
-    this.axios.get('/api/movieOnInfoList?cityId=10').then(res=>{
+  activated(){
+    var cityId = this.$store.state.city.id;
+  if(this.prevCityId === cityId){return;}
+    this.axios.get('/api/movieOnInfoList?cityId='+cityId).then(res=>{
       var msg = res.data.msg;
       if(msg == 'ok'){
         this.movieList = res.data.data.movieList;
-        this.$nextTick(()=>{//vue提供的方法，当页面数据加载完成才触发里面的回调函数
-         var scroll= new BScroll(this.$refs.movie_body,{//进行scroll配置
-            tap:true,//开启tap事件
-            probeType:1//上拉刷新，截流
-          });
-            scroll.on('scroll',(pos)=>{
-              if(pos.y>30){//当拖拽的距离大于30时
+        this.isLoading = false;
+        this.prevCityId = cityId
+        // this.$nextTick(()=>{//vue提供的方法，当页面数据加载完成才触发里面的回调函数
+        // });
+      
+        
+      }
+    })
+  },
+  methods:{
+    handleToDetail(){
+      console.log(1111)
+    },
+    handleToScroll(pos){
+      if(pos.y>30){//当拖拽的距离大于30时
                   this.pullDownMsg = '正在更新中'
-              }
-          
-        });
-        scroll.on('touchEnd',(pos)=>{
-          if(pos.y>30){
+       }
+    },
+    handleToTouchEnd(pos){
+  if(pos.y>30){
             this.axios.get('/api/movieOnInfoList?cityId=12').then((res)=>{
               var msg = res.data.msg;
               if(msg == 'ok'){
@@ -65,16 +77,6 @@ export default {
               }
             })
           }
-        })
-        });
-      
-        
-      }
-    })
-  },
-  methods:{
-    handleToDetail(){
-      console.log(1111)
     }
   }
 

@@ -1,69 +1,79 @@
 <template>
-    <div class="cinema_body">
-				<ul>
-					<li v-for="item in cinemaList" :key="item.id">
-						<div>
-							<span>{{item.nm}}</span>
-							<span class="q"><span class="price">{{item.sellPrice}}</span>元起</span>
-						</div>
-						<div class="address">
-							<span>{{item.addr}}</span>
-							<span>{{item.distance}}</span>
-						</div>
-						<div class="card">
-                			<div v-for="(num,key) in item.tag" v-if="num===1" :key="key" :class="key | classCard(key)">{{key |formatCard(key)}}</div>
-       					</div>
-					</li>
-				</ul>
-			</div>
+  <div class="cinema_body">
+      <ul>
+        <li v-for="item in cinemaList" :key="item.id">
+          <div>
+            <span>{{item.nm}}</span>
+            <span class="q">
+              <span class="price">{{item.sellPrice}}</span>元起
+            </span>
+          </div>
+          <div class="address">
+            <span>{{item.addr}}</span>
+            <span>{{item.distance}}</span>
+          </div>
+          <div class="card">
+            <div
+              v-for="(num,key) in item.tag"
+              v-if="num===1"
+              :key="key"
+              :class="key | classCard(key)"
+            >{{key |formatCard(key)}}</div>
+          </div>
+        </li>
+      </ul>
+  </div>
 </template>
 <script>
 export default {
-   name:'CiList',
-   data(){
-	   return{
-		   cinemaList:[]
-	   }
-   },
-   mounted(){
-	   this.axios.get('/api/cinemaList?cityId=10').then((res)=>{
-		   var msg = res.data.msg;
-		   if(msg ==='ok'){
-			   console.log(res)
-			   this.cinemaList = res.data.data.cinemas
-		   }
-	   })
-   },
-   filters:{
-	   formatCard(key){
-		   var card = [
-			   {key : 'allowRefund', value:'改签'},
-			   {key: 'endorse' , value: '退订'},
-			   {key : 'sell' ,value:'折扣卡'},
-			   {key: 'snack' , value:'小吃'}
-		   ];
-		   for(var i = 0;i<card.length;i++){
-			   if(card[i].key === key){
-				   return card[i].value;
-			   }
-		   }
-	   },
-	   classCard(key){
-		      var card = [
-			   {key : 'allowRefund', value:'or'},
-			   {key: 'endorse' , value: 'or'},
-			   {key : 'sell' ,value:'bl'},
-			   {key: 'snack' , value:'bl'}
-		   ];
-		   for(var i = 0;i<card.length;i++){
-			   if(card[i].key === key){
-				   return card[i].value;
-			   }
-		   }
-	   }
-   }
+  name: "CiList",
+  data() {
+    return {
+      cinemaList: [],
+      prevCityId:-1
+    };
+  },
+  activated() {
+    var cityId = this.$store.state.city.id;
+    if(this.prevCityId === cityId){return;}
+    this.axios.get("/api/cinemaList?cityId="+cityId).then(res => {
+      var msg = res.data.msg;
+      if (msg === "ok") {
+        this.cinemaList = res.data.data.cinemas;
+        this.prevCityId = cityId
 
-}
+      }
+    });
+  },
+  filters: {
+    formatCard(key) {
+      var card = [
+        { key: "allowRefund", value: "改签" },
+        { key: "endorse", value: "退订" },
+        { key: "sell", value: "折扣卡" },
+        { key: "snack", value: "小吃" }
+      ];
+      for (var i = 0; i < card.length; i++) {
+        if (card[i].key === key) {
+          return card[i].value;
+        }
+      }
+    },
+    classCard(key) {
+      var card = [
+        { key: "allowRefund", value: "or" },
+        { key: "endorse", value: "or" },
+        { key: "sell", value: "bl" },
+        { key: "snack", value: "bl" }
+      ];
+      for (var i = 0; i < card.length; i++) {
+        if (card[i].key === key) {
+          return card[i].value;
+        }
+      }
+    }
+  }
+};
 </script>
 <style scoped>
 #content .cinema_body{ flex:1; overflow:auto;}
@@ -78,6 +88,5 @@ export default {
 .cinema_body .card div{ padding: 0 3px; height: 15px; line-height: 15px; border-radius: 2px; color: #f90; border: 1px solid #f90; font-size: 13px; margin-right: 5px;}
 .cinema_body .card div.or{ color: #f90; border: 1px solid #f90;}
 .cinema_body .card div.bl{ color: #589daf; border: 1px solid #589daf;}
-
 </style>
 
