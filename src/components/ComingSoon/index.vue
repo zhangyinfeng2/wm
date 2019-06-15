@@ -4,9 +4,9 @@
         <div>
     <ul>
       	<li v-for="item in comingList" :key="item.id">
-						<div class="pic_show"><img :src="item.img | setWH('128.180')"></div>
+						<div class="pic_show"><img :src="item.img | setWH('128.180')" @tap="handleToDetail(item.id)"></div>
 						<div class="info_list">
-							<h2>{{item.nm}}  <img src="@/assets/max.png" v-if="item.version"></h2>
+							<h2 @tap="handleToDetail(item.id)">{{item.nm}}  <img src="@/assets/max.png" v-if="item.version"></h2>
 							<p><span class="person">{{item.wish}}</span> 人想看</p>
 							<p>主演: {{item.star}}</p>
 							<p>{{item.showInfo}}</p>
@@ -28,6 +28,12 @@ export default {
      comingList:[],
      prevCityId:-1
 
+    }
+  },
+  methods:{
+
+    handleToDetail(movieId){
+      this.$router.push('/move/detail/2/'+movieId)
     }
   },
     activated(){

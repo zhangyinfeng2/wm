@@ -6,11 +6,11 @@
     <ul>
       <li class="pullDown">{{pullDownMsg}}</li>
       <li v-for="item in movieList" :key="item.id">
-        <div class="pic_show" @tap="handleToDetail">
+        <div class="pic_show" @tap="handleToDetail(item.id)">
           <img :src="item.img | setWH('128.180')">
         </div>
         <div class="info_list">
-          <h2>{{item.nm}} <img src="@/assets/max.png" v-if="item.version"></h2>
+          <h2 @tap="handleToDetail(item.id)">{{item.nm}} <img src="@/assets/max.png" v-if="item.version"></h2>
           <p>
             观众评分
             <span class="grade">{{item.sc}}</span>
@@ -56,8 +56,9 @@ export default {
     })
   },
   methods:{
-    handleToDetail(){
-      console.log(1111)
+    handleToDetail(movieId){
+      console.log(111)
+      this.$router.push('/move/detail/1/'+movieId)
     },
     handleToScroll(pos){
       if(pos.y>30){//当拖拽的距离大于30时

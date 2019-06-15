@@ -1,5 +1,6 @@
 <template>
     <div id="main">
+       
         <Header title='电影'></Header>
          <div id="content">
               <div class="movie_menu">
@@ -14,22 +15,61 @@
                         <i class="iconfont icon-sousuo"></i>
                     </router-link>
              </div>
-                <keep-alive>
+            <keep-alive>
              <router-view />
              </keep-alive>
          </div>
         <TabBar></TabBar>
+        <router-view name="detail"></router-view>
     </div>
 </template>
 <script>
 import Header from '@/components/Header'
 import TabBar from '@/components/TabBar'
+import {messageBox} from '@/components/JS'
 
 export default {
     name:'move',
     components:{
         Header,
         TabBar
+    },
+    mounted(){
+        setTimeout(()=>{    this.axios.get('/api/getLocation').then(res=>{
+            var msg = res.data.msg;
+            if(msg ==='ok'){
+                var nm = res.data.data.nm
+                var id = res.data.data.id
+                if(this.$store.state.city.id ==id){return}
+    messageBox({
+            title:'定位',
+            content:nm,
+            cancel:'取消',
+            ok:'切换定位',
+            handleCancel(){
+                // console.log(1);
+            },
+            handleOk(){
+                window.localStorage.setItem('nowNm',nm);
+                window.localStorage.setItem('nowId',id);
+                window.location.reload()
+            }
+        })
+            }
+        })},3000)
+    
+        // messageBox({
+        //     title:'定位',
+        //     content:'沈阳',
+        //     cancel:'取消',
+        //     ok:'切换定位',
+        //     handleCancel(){
+        //         console.log(1);
+        //     },
+        //     handleOk(){
+        //         console.log(2)
+        //     }
+        // })
     }
 
 }
